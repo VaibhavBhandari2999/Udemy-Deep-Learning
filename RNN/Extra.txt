@@ -1,0 +1,12 @@
+https://colah.github.io/posts/2015-08-Understanding-LSTMs/
+
+https://stackoverflow.com/questions/45278286/how-to-choose-lstm-keras-parameters
+
+https://datascience.stackexchange.com/questions/10615/number-of-parameters-in-an-lstm-model
+
+https://www.udemy.com/deeplearning/learn/lecture/8374814#questions/3554002
+
+https://towardsdatascience.com/predicting-stock-price-with-lstm-13af86a74944
+
+https://www.kdnuggets.com/2018/11/keras-long-short-term-memory-lstm-model-predict-stock-prices.html
+
