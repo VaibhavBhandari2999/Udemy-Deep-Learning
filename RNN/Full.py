@@ -108,14 +108,30 @@ real_stock_price = dataset_test.iloc[:, 1:2].values      #Change it to numpy arr
 #Contains only 20 observations as only 20 financial days in a month are considered.
 
 # Getting the predicted stock price of 2017
-dataset_total = pd.concat((dataset_train['Open'], dataset_test['Open']), axis = 0)
-inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values
-inputs = inputs.reshape(-1,1)
-inputs = sc.transform(inputs)
-X_test = []
-for i in range(60, 80):
-    X_test.append(inputs[i-60:i, 0])
+dataset_total = pd.concat((dataset_train['Open'], dataset_test['Open']), axis = 0)#This will contain whole training set and test set. It contains two arguements. Second one is whther we want to concatenate the rows or he columns.For horizontal concatenation, we use axis=1 and for vertical we use axis=0. The first arguement contains the two datasets we want to concatenate, but we want to join only the 'Open' parameter(for the Open_google_stock_price) so we do dataset_train['Open'] and dataset_test['Open'].
+inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values# So from dataset_total, we need the lower bound of the range of inputs we need. The lower bound is the stock price at Jan 3rd - 60. To get January 3rd,we do len(dataset_total) - len(dataset_test). As Dataset_total is train+test, this expression gives basically the index of the firts financial day of the new year, which is basically the first index of the test set(but as we now want to use dataset_total, we use thi sway to find the index of the first test set in dataset_total). Upper bound is the last index, whihc is denoted by a blank. Also, we use .values to make it a numpy array
+inputs = inputs.reshape(-1,1) # As we didn't use illoc to get the numpy array, we have to reshape it.
+#and you will often get this format problem,this shape problem when working with NumPy,and the solution to this,if you don't get this NumPy Array of the format you want,that is with your observations and linesand one or several columns,well, the trick to reshape the inputsis to use the reshape function,
+# Also, we need to scale out inputs as we had scaled the dataset_train/X_train
+#We only need to scale the inputs not the actual test values, as we need to keep the test values as they are.
+inputs = sc.transform(inputs)# We dont use sc.fit, as we need to use the same way the sc affected the train to affect the total also., so we directly transorm, without fitting(Fitting basically fits the sc to that particular dataset in ordder to determine how to scale it better). 
+X_test = []         #like X_train but for test
+for i in range(60, 80):             #Lower bound should be 60 only, as i-60 shouldnt be invalid. As test set contains only 20 financial days, we only need to go from 60 to 80.
+    X_test.append(inputs[i-60:i, 0])        #The 0 corresponds to the firts column of the inpu
 X_test = np.array(X_test)
-X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
-predicted_stock_price = regressor.predict(X_test)
-predicted_stock_price = sc.inverse_transform(predicted_stock_price)
+X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))#We get the 3d format here too.See line 46 onwards
+predicted_stock_price = regressor.predict(X_test) 
+predicted_stock_price = sc.inverse_transform(predicted_stock_price)# We need to inverse the scaling as the 
+#It is of course to inverse the scaling of our predictions because of course our regressor was trained to predict the scaled values of the stock price, but no worries.To get the original scale of these scaled predicted values we simply need to apply the inverse transform method from our scaling sc object.
+
+# Visualising the results
+plt.plot(real_stock_price, color = 'red', label = 'Real Google Stock Price')
+plt.plot(predicted_stock_price, color = 'blue', label = 'Predicted Google Stock Price')
+plt.title('Google Stock Price Prediction')
+plt.xlabel('Time')
+plt.ylabel('Google Stock Price')
+plt.legend()
+plt.show()
+
+
+#Our model reacts well to smooth changes but not so well to fast non-linear changes.
